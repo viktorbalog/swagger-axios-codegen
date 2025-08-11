@@ -66,7 +66,7 @@ export function getResponseType(reqProps: IRequestMethod, isV3: boolean): { resp
         } else {
             return refClassName(refType.$ref)
         }
-    }).join(" & ");
+    }).reverse().join(" & ");
     isRef = true;
    } else {
     result = checkType
