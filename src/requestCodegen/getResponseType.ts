@@ -43,14 +43,32 @@ export function getResponseType(reqProps: IRequestMethod, isV3: boolean): { resp
       const refType = toBaseType(resSchema.items.type, resSchema.items?.format)
       result = refType + '[]'
     }
-  } else if (resSchema.$ref) {
+  }
+   else if (resSchema.$ref) {
     // 如果是引用对象
     result = refClassName(resSchema.$ref) || 'any'
     isRef = true
   } else if (resSchema.oneOf) {
     result = resSchema.oneOf.map((refType) => refClassName(refType.$ref)).join(" | ")
     isRef = true
-  } else {
+  } else if (resSchema.allOf) {
+    result = resSchema.allOf.map((refType) => {
+        if(typeof refType.$ref === 'undefined' && refType.type === 'object' && refType.properties) {
+            const properties = Object.keys(refType.properties).map(key => {
+                if(refType.properties[key].type === 'array') {
+                    return key + ': ' + refClassName(refType.properties[key].items.$ref) + '[]'
+                } else {
+                    return key + ': ' + refClassName(refType.properties[key].$ref)
+                }
+            })
+
+            return '{ ' + properties.join(', ') + ' }'
+        } else {
+            return refClassName(refType.$ref)
+        }
+    }).join(" & ");
+    isRef = true;
+   } else {
     result = checkType
     result = toBaseType(result, format)
   }

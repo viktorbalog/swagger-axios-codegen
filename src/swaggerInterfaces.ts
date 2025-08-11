@@ -124,6 +124,7 @@ export interface ISchema {
   'items'?: IParameterItems
   'format'?: string,
   'oneOf'?: { $ref: string }[];
+  'allOf'?: ({ $ref: string } & ISchema)[];
   'properties'?: { [key: string]: IParameterItems }
 }
 

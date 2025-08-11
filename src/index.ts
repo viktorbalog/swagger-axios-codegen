@@ -386,7 +386,7 @@ function codegenMultimatchInclude(
 
   const includeRules: Record<string, Set<string>> = {}
   options.include.forEach(classNameFilter => {
-    // *,?,**,{},!, 
+    // *,?,**,{},!,
     // NOTICE: 目前要求 className 严格按照pascalcase书写
     if (typeof classNameFilter === 'string') {
       if (includeRules[classNameFilter] === undefined) {

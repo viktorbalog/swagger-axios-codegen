@@ -3,10 +3,10 @@
   "version": "0.17.4",
   "main": "./dist/index",
   "typings": "./dist/",
-  "author": "Manwei Leung <mic.liangwenwei@foxmail.com>",
+  "author": "Viktor Balog <viktor.istvan.balogh@gmail.com>",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/Manweill/swagger-axios-codegen.git",
+    "url": "https://github.com/viktorbalog/swagger-axios-codegen",
     "type": "git"
   },
   "keywords": [
@@ -34,7 +34,7 @@
     "structured-log": "^0.2.0"
   },
   "devDependencies": {
-    "@types/node": "16",
+    "@types/node": "^24.2.1",
     "@types/prettier": "^2.7.2",
     "rimraf": "^5.0.5",
     "tslint": "^5.10.0",
