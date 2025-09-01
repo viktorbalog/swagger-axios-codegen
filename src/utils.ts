@@ -1,5 +1,5 @@
 import { IDefinitionClass, IDefinitionEnum } from './baseInterfaces'
-import { IDefinitionProperty } from './swaggerInterfaces'
+import { IDefinition, IDefinitionProperty, IParameter, ISwaggerSource } from './swaggerInterfaces'
 
 let definedGenericTypes: string[] = []
 const UniversalGenericTypes = ['IList', 'List']
@@ -68,6 +68,23 @@ export function refClassName(s: string, format?: string): string {
   // 如果是数字开头，则加上下划线
   if (!Number.isNaN(Number(result[0]))) result = 'IRef' + result
   return result
+}
+
+export function derefParameter(param: IParameter, source: ISwaggerSource) : IParameter {
+  if(!param.$ref?.startsWith('#/')) {
+    return param;
+  }
+
+  // #/components/schema/type
+  const parts = param.$ref.substring(2).split('/');
+  if(parts.length < 3 || parts[0] !== 'components' || parts[1] !== 'parameters') {
+    return param;
+  }
+
+  return {
+    ...param,
+    ...source.components.parameters[parts[2]],
+  } as IParameter;
 }
 
 /** 移除特殊字符 */
@@ -161,7 +178,7 @@ export function trimString(str: string, char: string, type: string) {
   return str.replace(/^\s+|\s+$/g, '')
 }
 
-/** 
+/**
  * 泛型类名提取数组
  * A<B<C>> => [A,B,C]
  **/

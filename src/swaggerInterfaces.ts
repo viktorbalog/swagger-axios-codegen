@@ -113,7 +113,28 @@ export interface IDefinitionProperty {
 }
 
 export interface IComponents {
-  schemas: {
+  schemas?: {
+    [key: string]: IDefinition
+  },
+  responses?: {
+    [key: string]: IDefinition
+  },
+  parameters?: {
+    [key: string]: IParameter
+  },
+  examples?: {
+    [key: string]: IDefinition
+  },
+  requestBodies?: {
+    [key: string]: IDefinition
+  },
+  securitySchemes?: {
+    [key: string]: IDefinition
+  },
+  links?: {
+    [key: string]: IDefinition
+  },
+  callbacks?: {
     [key: string]: IDefinition
   }
 }

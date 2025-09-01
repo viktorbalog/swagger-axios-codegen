@@ -1,6 +1,6 @@
 import camelcase from 'camelcase'
 import { ISwaggerOptions } from '../baseInterfaces'
-import { IParameter, IPaths, IRequestUrl } from '../swaggerInterfaces'
+import { IParameter, IPaths, IRequestUrl, ISwaggerSource } from '../swaggerInterfaces'
 import { getClassNameByPath, getMethodNameByPath, RemoveSpecialCharacters } from '../utils'
 import { getContentType } from './getContentType'
 import { getRequestBody } from './getRequestBody'
@@ -18,7 +18,7 @@ export interface IRequestMethods {
   requestSchema: any;
 }
 
-export function requestCodegen(paths: IPaths, isV3: boolean, options: ISwaggerOptions): IRequestClass {
+export function requestCodegen(paths: IPaths, isV3: boolean, options: ISwaggerOptions, source: ISwaggerSource): IRequestClass {
   const requestClasses: IRequestClass = {}
 
   if (!!paths)
@@ -29,7 +29,7 @@ export function requestCodegen(paths: IPaths, isV3: boolean, options: ISwaggerOp
       // so we do not accidentally interpret them as a http method later
       if (pathLevelParams) delete requestAndParams['parameters']
       const request = requestAndParams as IRequestUrl
-      
+
       let methodName = getMethodNameByPath(path)
       for (const [method, reqProps] of Object.entries(request)) {
         methodName =
@@ -95,7 +95,7 @@ export function requestCodegen(paths: IPaths, isV3: boolean, options: ISwaggerOp
             tempParameters = tempParameters.concat(mapFormDataToV2(multipartDataProperties.schema))
           }
 
-          parsedParameters = getRequestParameters(tempParameters, options.useHeaderParameters)
+          parsedParameters = getRequestParameters(tempParameters, options.useHeaderParameters, source)
           formData = parsedParameters.requestFormData
             ? 'data = new FormData();\n' + parsedParameters.requestFormData
             : ''

@@ -1,6 +1,6 @@
-import { IParameter } from '../swaggerInterfaces'
+import { IParameter, ISwaggerSource } from '../swaggerInterfaces'
 
-import { refClassName, toBaseType, RemoveSpecialCharacters } from '../utils'
+import { refClassName, toBaseType, RemoveSpecialCharacters, derefParameter } from '../utils'
 
 import camelcase from 'camelcase'
 
@@ -29,7 +29,7 @@ function getUniqParams(params: IParameter[]): IParameter[] {
  * 生成参数
  * @param params
  */
-export function getRequestParameters(params: IParameter[], useHeaderParameters: boolean) {
+export function getRequestParameters(params: IParameter[], useHeaderParameters: boolean, source: ISwaggerSource) {
   params = getUniqParams(params)
   let requestParameters = ''
   let requestFormData = ''
@@ -40,57 +40,59 @@ export function getRequestParameters(params: IParameter[], useHeaderParameters: 
   let imports: string[] = []
   let moreBodyParams = params.filter(item => item.in === 'body').length > 1
   params.forEach(p => {
+    const ref = derefParameter(p, source)
+
     // 根据设置跳过请求头中的参数
-    if (!useHeaderParameters && p.in === 'header') return
+    if (!useHeaderParameters && ref.in === 'header') return
     let propType = ''
     // 引用类型定义
-    if (p.schema) {
-      if (p.schema.items) {
-        propType = refClassName(p.schema.items.$ref)
-        if (p.schema.type && p.schema.type === 'array') {
+    if (ref.schema) {
+      if (ref.schema.items) {
+        propType = refClassName(ref.schema.items.$ref)
+        if (ref.schema.type && ref.schema.type === 'array') {
           propType += '[]'
         }
-      } else if (p.schema.$ref) {
-        propType = refClassName(p.schema.$ref)
+      } else if (ref.schema.$ref) {
+        propType = refClassName(ref.schema.$ref)
         // console.log('propType', refClassName(p.schema.$ref))
-      } else if (p.schema.type) {
-        propType = toBaseType(p.schema.type)
+      } else if (ref.schema.type) {
+        propType = toBaseType(ref.schema.type)
       } else {
         throw new Error('Could not find property type on schema')
       }
       imports.push(propType)
-    } else if (p.items) {
-      propType = p.items.$ref ? refClassName(p.items.$ref) + '[]' : toBaseType(p.items.type, p.items?.format) + '[]'
+    } else if (ref.items) {
+      propType = ref.items.$ref ? refClassName(ref.items.$ref) + '[]' : toBaseType(ref.items.type, ref.items?.format) + '[]'
       imports.push(propType)
     }
     // 基本类型
     else {
-      propType = toBaseType(p.type, p?.format)
+      propType = toBaseType(ref.type, ref?.format)
     }
 
-    const paramName = camelcase(p.name)
+    const paramName = camelcase(ref.name)
     requestParameters += `
-    /** ${p.description || ''} */
-    ${paramName}${p.required ? '' : '?'}:${propType},`
+    /** ${ref.description || ''} */
+    ${paramName}${ref.required ? '' : '?'}:${propType},`
 
     // 如果参数是从formData 提交
-    if (p.in === 'formData') {
+    if (ref.in === 'formData') {
       requestFormData += `if(params['${paramName}']){
         if(Object.prototype.toString.call(params['${paramName}']) === '[object Array]'){
           for (const item of params['${paramName}']) {
-            data.append('${p.name}',item as any)
+            data.append('${ref.name}',item as any)
           }
         } else {
-          data.append('${p.name}',params['${paramName}'] as any)
+          data.append('${ref.name}',params['${paramName}'] as any)
         }
       }\n
       `
-    } else if (p.in === 'path') {
-      requestPathReplace += `url = url.replace('{${p.name}}',params['${paramName}']+'')\n`
-    } else if (p.in === 'query') {
-      queryParameters.push(`'${p.name}':params['${paramName}']`)
-    } else if (p.in === 'body') {
-      const body = moreBodyParams ? `'${p.name}':params['${paramName}']` : `params['${paramName}']`
+    } else if (ref.in === 'path') {
+      requestPathReplace += `url = url.replace('{${ref.name}}',params['${paramName}']+'')\n`
+    } else if (ref.in === 'query') {
+      queryParameters.push(`'${ref.name}':params['${paramName}']`)
+    } else if (ref.in === 'body') {
+      const body = moreBodyParams ? `'${ref.name}':params['${paramName}']` : `params['${paramName}']`
 
       // var body = p.schema
       //   ? p.schema.type === 'array'
@@ -98,8 +100,8 @@ export function getRequestParameters(params: IParameter[], useHeaderParameters: 
       //     : `...params['${paramName}']`
       //   : `'${p.name}':params['${paramName}']`
       bodyParameters.push(body)
-    } else if (p.in === 'header') {
-      headerParameters.push(`'${p.name}':params['${paramName}']`)
+    } else if (ref.in === 'header') {
+      headerParameters.push(`'${ref.name}':params['${paramName}']`)
     }
   })
   const bodyParameter = moreBodyParams ? `{${bodyParameters.join(',')}}` : bodyParameters.join(',')

@@ -1,6 +1,6 @@
 {
   "name": "@viktorbalog/swagger-axios-codegen",
-  "version": "0.17.5",
+  "version": "0.17.6",
   "main": "./dist/index",
   "typings": "./dist/",
   "author": "Viktor Balog <viktor.istvan.balogh@gmail.com>",
