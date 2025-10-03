@@ -65,7 +65,8 @@ export interface IClassDef {
 
 export interface IDefinitionClass {
   value: IClassDef
-  name: string
+  name: string,
+  extends: string|null
 }
 
 export interface IDefinitionClasses {

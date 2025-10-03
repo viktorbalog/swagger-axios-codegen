@@ -93,7 +93,8 @@ export interface IDefinition {
   additionalProperties: IDefinitionProperty | boolean | undefined
   description: string
   enum: any[],
-  items: IDefinitionProperty
+  items: IDefinitionProperty,
+  $ref?: string
 }
 
 export interface IDefinitionProperties {

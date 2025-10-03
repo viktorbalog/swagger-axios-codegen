@@ -41,7 +41,8 @@ export function definitionsCodeGen(definitions: IDefinitions) {
 
         definitionModels[`#/definitions/${k}`] = {
           value: model,
-          name: className
+          name: className,
+          extends: v.$ref ? refClassName(v.$ref) : null
         }
       }
     }

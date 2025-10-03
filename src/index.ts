@@ -149,7 +149,7 @@ export async function codegen(params: ISwaggerOptions) {
     Object.values(models).forEach(item => {
       const text =
         params.modelMode === 'interface'
-          ? interfaceTemplate(item.value.name, item.value.props, [], params.strictNullChecks, item.value.description)
+          ? interfaceTemplate(item.value.name, item.value.props, [], params.strictNullChecks, item.value.description, item.extends)
           : classTemplate(
             item.value.name,
             item.value.props,
@@ -230,7 +230,7 @@ function codegenAll(
     Object.values(models).forEach(item => {
       const text =
         options.modelMode === 'interface'
-          ? interfaceTemplate(item.value.name, item.value.props, [], options.strictNullChecks, item.value.description)
+          ? interfaceTemplate(item.value.name, item.value.props, [], options.strictNullChecks, item.value.description, item.extends)
           : classTemplate(
             item.value.name,
             item.value.props,

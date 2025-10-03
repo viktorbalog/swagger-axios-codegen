@@ -44,7 +44,8 @@ export function componentsCodegen(definitions: IComponents) {
 
         definitionModels[`#/components/schemas/${k}`] = {
           value: model,
-          name: className
+          name: className,
+          extends: v.$ref ? refClassName(v.$ref) : null
         }
       }
     }

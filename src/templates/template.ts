@@ -13,6 +13,7 @@ export function interfaceTemplate(
   imports: string[],
   strictNullChecks: boolean = true,
   description: string,
+  extending: string = null,
 ) {
   if (isDefinedGenericTypes(name)) {
     // 已经定义过的interface不再生成
@@ -29,7 +30,7 @@ export function interfaceTemplate(
   ${importString}
 
   /** ${description} */
-  export interface ${name} {
+  export interface ${name}${extending ? ' extends ' + extending : ''} {
 
     ${props.map(p => classPropsTemplate(
     p.name,
@@ -232,10 +233,10 @@ ${options.useStaticMethod ? 'static' : ''} ${camelcase(
       : ''}
     const configs:IRequestConfig = getConfigs('${method}', '${contentType}', url, options)
     ${parsedParameters && queryParameters.length > 0 ? 'configs.params = {' + queryParameters.join(',') + '}' : ''}
-    
-    
+
+
     ${requestBodyString(method, parsedParameters, bodyParameter, requestBody, contentType, formData)}
-    
+
     axios(configs, ${resolveString}, reject);
   });
 }`
@@ -244,10 +245,10 @@ ${options.useStaticMethod ? 'static' : ''} ${camelcase(
 function requestBodyString(method: string, parsedParameters: [], bodyParameter: [], requestBody: string, contentType: string, formData: string) {
   if (parsedParameters && bodyParameter && bodyParameter.length > 0 || !!requestBody || formData.length > 0) {
 
-    const tips = `/** 适配移动开发（iOS13 等版本），只有 POST、PUT 等请求允许带body */ \n 
+    const tips = `/** 适配移动开发（iOS13 等版本），只有 POST、PUT 等请求允许带body */ \n
     console.warn('适配移动开发（iOS13 等版本），只有 POST、PUT 等请求允许带body')`
     return `
-    
+
     ${method === 'post' || method === 'put' ? '' : tips}
 
     let data = ${parsedParameters && bodyParameter && bodyParameter.length > 0
